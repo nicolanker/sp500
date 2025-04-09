@@ -2,7 +2,7 @@ name: Run Python Bot Continuously
 
 on:
   schedule:
-    - cron: "*/4 * * * *" # Runs every 4 minutes
+    - cron: "*/400 * * * *" # Runs every 4 minutes
   workflow_dispatch: # Allows manual triggering
 
 jobs:
