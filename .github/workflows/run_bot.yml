@@ -1,0 +1,30 @@
+name: Run Python Bot Continuously
+
+on:
+  schedule:
+    - cron: "*/4 * * * *" # Runs every 4 minutes
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  run-python-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run the bot script
+      env:
+        API_KEY: ${{ secrets.API_KEY }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      run: python bot.py

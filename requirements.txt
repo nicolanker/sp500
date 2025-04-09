@@ -1,0 +1,5 @@
+pandas
+numpy
+ta
+alpaca-trade-api
+scikit-learn
