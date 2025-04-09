@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
+import pytz
 from ta.momentum import RSIIndicator, StochasticOscillator, StochRSIIndicator, WilliamsRIndicator
 from ta.trend import MACD, ADXIndicator, EMAIndicator
 from alpaca_trade_api.rest import REST, TimeFrame
@@ -176,11 +178,34 @@ if train_df.empty:
 weights = train_model(train_df)
 print("Learned Weights:", weights)
 
-# Main loop
+
+
+eastern = pytz.timezone('US/Eastern')
+
 while True:
     try:
-        run_bot(weights)
-        time.sleep(240)
+        now = datetime.now(eastern)
+        current_time = now.time()
+
+        if current_time >= datetime.strptime("15:59", "%H:%M").time():
+            print("Time is 3:59 PM EST - closing all positions.")
+            positions = api.list_positions()
+            for p in positions:
+                side = 'sell' if int(p.qty) > 0 else 'buy'
+                api.submit_order(symbol=p.symbol, qty=abs(int(p.qty)), side=side, type='market', time_in_force='gtc')
+                print(f"Closed position on {p.symbol}")
+            
+            print("Positions closed. Sleeping until next trading window...")
+            time.sleep(60 * 30)  # Sleep for 30 minutes (can adjust as needed)
+
+        elif datetime.strptime("09:00", "%H:%M").time() <= current_time <= datetime.strptime("15:58", "%H:%M").time():
+            run_bot(weights)
+            time.sleep(240)  # Run every 4 minutes
+
+        else:
+            print("Outside trading window. Sleeping...")
+            time.sleep(300)  # 5-minute sleep when inactive
+
     except Exception as e:
         print(f"Error: {e}")
         time.sleep(60)
