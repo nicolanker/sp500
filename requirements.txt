@@ -3,3 +3,5 @@ numpy
 ta
 alpaca-trade-api
 scikit-learn
+datetime
+pytz
